@@ -11,28 +11,23 @@ async def upload_document(
 ):
     try:
         content_type = file.content_type
-        
-        # Route 1: PDF Files
-        if content_type == "application/pdf":
-            # Extract text locally
+         
+        if content_type == "application/pdf": 
             extracted_text = await parse_pdf(file)
             if not extracted_text.strip():
                 raise HTTPException(status_code=400, detail="Could not extract text from PDF (it might be scanned).")
             
-            # Send to Text LLM
+            
             result = generate_text_summary(extracted_text, length)
             return result
             
-        # Route 2: Image Files (Groq Vision)
-        elif content_type in ["image/jpeg", "image/png", "image/jpg"]:
-            # Convert to Base64
+        #  Image Files  
+        elif content_type in ["image/jpeg", "image/png", "image/jpg"]: 
             base64_image = await encode_image(file)
-            
-            # Send directly to Vision LLM
+             
             result = generate_image_summary(base64_image, content_type, length)
             return result
-            
-        # Error handling for unsupported files
+             
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {content_type}")
             

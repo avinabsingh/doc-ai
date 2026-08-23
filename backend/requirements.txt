@@ -5,7 +5,6 @@ langchain
 langchain-groq
 langchain-core
 PyMuPDF
-pytesseract
-Pillow
+ 
 python-dotenv
 pydantic
