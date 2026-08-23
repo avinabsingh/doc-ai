@@ -17,15 +17,15 @@ origins = [
  
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allows requests from any origin (including all Vercel preview URLs)
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (POST, GET, OPTIONS, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
  
 app.include_router(router, prefix="/api/v1")
 
  
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "DOC-AI API is running successfully!"}
