@@ -1,35 +1,33 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from app.services.document_parser import parse_pdf, encode_image
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from app.services.llm_service import generate_text_summary, generate_image_summary
 
 router = APIRouter()
 
+# Define the expected JSON payload from the React frontend
+class DocumentRequest(BaseModel):
+    type: str     # "text" or "image"
+    content: str  # The raw extracted text OR the Base64 image string
+    length: str
+
 @router.post("/upload")
-async def upload_document(
-    file: UploadFile = File(...), 
-    length: str = Form("medium") # Default to medium if not provided
-):
+async def upload_document(request: DocumentRequest):
     try:
-        content_type = file.content_type
-         
-        if content_type == "application/pdf": 
-            extracted_text = await parse_pdf(file)
-            if not extracted_text.strip():
-                raise HTTPException(status_code=400, detail="Could not extract text from PDF (it might be scanned).")
+        #   PDF Text
+        if request.type == "text":
+            if not request.content.strip():
+                raise HTTPException(status_code=400, detail="No text provided.")
+            return generate_text_summary(request.content, request.length)
             
-            
-            result = generate_text_summary(extracted_text, length)
-            return result
-            
-        #  Image Files  
-        elif content_type in ["image/jpeg", "image/png", "image/jpg"]: 
-            base64_image = await encode_image(file)
+        #   Base64 Image
+        elif request.type == "image": 
+            header, base64_data = request.content.split(",", 1)
+            mime_type = header.split(":")[1].split(";")[0]
              
-            result = generate_image_summary(base64_image, content_type, length)
-            return result
-             
+            return generate_image_summary(base64_data, mime_type, request.length)
+            
         else:
-            raise HTTPException(status_code=400, detail=f"Unsupported file type: {content_type}")
+            raise HTTPException(status_code=400, detail="Invalid request type.")
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -4,6 +4,7 @@ import SummaryOptions from '../components/SummaryOptions';
 import SummaryDisplay from '../components/SummaryDisplay';
 import Loader from '../components/Loader';
 import { Sparkles, AlertCircle } from 'lucide-react';
+import { extractTextFromPDF, convertImageToBase64 } from '../utils/documentParser';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -25,37 +26,56 @@ export default function Home() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) return;
+  e.preventDefault();
+  if (!file) return;
 
-    setIsLoading(true);
-    setError(null);
-    setSummaryData(null);
+  setIsLoading(true);
+  setError(null);
+  setSummaryData(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('length', length);
+  try {
+    let payload = {
+      length: length,
+      type: '',
+      content: ''
+    };
 
-    try { 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-      const response = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || 'Failed to process the document.');
-      }
-
-      const result = await response.json();
-      setSummaryData(result);
-    } catch (err) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+    // 1. Process Locally Based on File Type
+    if (file.type === 'application/pdf') {
+      const extractedText = await extractTextFromPDF(file);
+      if (!extractedText) throw new Error("Could not extract text. The PDF might be an image/scanned.");
+      
+      payload.type = 'text';
+      payload.content = extractedText;
+      
+    } else if (file.type.startsWith('image/')) {
+      const base64Image = await convertImageToBase64(file);
+      payload.type = 'image';
+      payload.content = base64Image;
     }
-  };
+
+    // 2. Send purely JSON to the backend
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const response = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }, // No more multipart/form-data!
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.detail || 'Failed to generate summary.');
+    }
+
+    const result = await response.json();
+    setSummaryData(result);
+    
+  } catch (err) {
+    setError(err.message || 'An unexpected error occurred. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8"> 
