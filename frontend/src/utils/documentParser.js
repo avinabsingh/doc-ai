@@ -1,8 +1,9 @@
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist'; 
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
  
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
- 
+// Extracts raw text from a PDF File object.
 export const extractTextFromPDF = async (file) => {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -20,8 +21,7 @@ export const extractTextFromPDF = async (file) => {
   return fullText.trim();
 };
 
-//Converts an image File object to a Base64 data URL.
- 
+// Convert image to Base64 data URL.
 export const convertImageToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

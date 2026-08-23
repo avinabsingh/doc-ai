@@ -124,8 +124,8 @@ export default function Home() {
  
       {isLoading && <Loader />}
 
-       
-      {summaryData && <SummaryDisplay data={summaryData} />}
+        
+    {summaryData && <SummaryDisplay data={summaryData} fileName={file?.name} />}    
     </div>
   );
 }

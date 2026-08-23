@@ -12,11 +12,9 @@ export default function App() {
             <div className="p-2 bg-indigo-600 text-white rounded-lg">
               <FileText className="w-5 h-5" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-slate-800">DocuMind</span>
+            <span className="font-bold text-lg tracking-tight text-slate-800">DOC-AI</span>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
-            Powered by Groq
-          </span>
+          
         </div>
       </header>
 
@@ -27,7 +25,7 @@ export default function App() {
 
       {/* Simple Footer */}
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        DocuMind • AI Document Summarizer
+        DOC-AI • AI Document Summarizer
       </footer>
     </div>
   );
