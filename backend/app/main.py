@@ -10,14 +10,10 @@ from app.api.routes import router
 app = FastAPI(
     title="DOC-AI API", 
 )
-origins = [
-    "http://localhost:5173",             # Local development
-    "https://doc-ai-coral.vercel.app"    # Your live Vercel frontend
-]
- 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from any origin (including all Vercel preview URLs)
+    allow_origins=["*"],   
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -32,21 +32,35 @@ DocuMind follows a simple client-server architecture.
 5. The response is validated using Pydantic.
 6. The structured result is returned to the frontend and displayed to the user.
 
-```mermaid
-graph TD
-    A[Document] --> B[React Frontend]
-    B --> C[Document Extraction]
-    C --> D[FastAPI Backend]
-    D --> E[LangChain]
-    E --> F[Groq Llama]
-    F --> G[Pydantic Validation]
-    G --> D
-    D --> B
-    B --> H[Results]
+```text
+Document Upload
+       │
+       ▼
+React Frontend
+       │
+       ▼
+Text Extraction / OCR
+       │
+       ▼
+FastAPI Backend
+       │
+       ▼
+LangChain
+       │
+       ▼
+Groq Llama Model
+       │
+       ▼
+Pydantic Validation
+       │
+       ▼
+Summary, Key Points & Suggestions
+```
 
 ## Tech Stack
 
 ### Frontend
+
 - React
 - Vite
 - Tailwind CSS
@@ -54,12 +68,14 @@ graph TD
 - Lucide React
 
 ### Backend
+
 - Python
 - FastAPI
 - Uvicorn
 - Pydantic
 
 ### AI & Document Processing
+
 - LangChain
 - Groq API
 - Llama Models
@@ -88,4 +104,4 @@ doc-ai/
 ├── .gitignore
 └── README.md
 
-````
+```

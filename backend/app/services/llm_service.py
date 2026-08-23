@@ -4,7 +4,9 @@ from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 from typing import List
- 
+import re
+
+
 class DocumentSummary(BaseModel):
     summary_text: str = Field(description="The summary of the document content")
     key_points: List[str] = Field(description="3 to 5 key bullet points")
@@ -42,15 +44,20 @@ def generate_text_summary(text: str, length: str) -> DocumentSummary:
 
 def generate_image_summary(base64_image: str, mime_type: str, length: str) -> dict:
     """Constructs the data URL from the raw base64 string and sends it to Groq Vision."""
-    
-    prompt_text = f"""
-    You are an expert document analyzer. Read the text in this image and provide a {length} summary.
-    
-    {parser.get_format_instructions()}
-    
-    CRITICAL: You must return ONLY raw, valid JSON. Do not include markdown blocks (like ```json).
-    """
      
+    prompt_text = f"""
+    You are an elite Vision-Language AI. Read the text and interpret the structure within the provided document image.
+    
+    TASK: Provide a {length} summary, extract key points, and suggest improvements based on the image content.
+    
+    ABSOLUTE FORMATTING RULES (FAILURE IS NOT AN OPTION):
+    1. {parser.get_format_instructions()}
+    2. OUTPUT ONLY RAW, VALID JSON. 
+    3. DO NOT wrap the JSON in markdown blocks (e.g., no ```json).
+    4. DO NOT include any introductory or concluding text (e.g., "Here is the JSON...").
+    5. DO NOT generate reasoning traces, inner monologues, or <think> tags. Start your response immediately with the opening bracket {{.
+    """
+    
     image_url = f"data:{mime_type};base64,{base64_image}"
     
     message = HumanMessage(
@@ -61,4 +68,7 @@ def generate_image_summary(base64_image: str, mime_type: str, length: str) -> di
     )
     
     response = vision_llm.invoke([message])
-    return parser.invoke(response)
+     
+    cleaned_text = re.sub(r'<think>.*?</think>', '', response.content, flags=re.DOTALL).strip()
+    
+    return parser.invoke(cleaned_text)
